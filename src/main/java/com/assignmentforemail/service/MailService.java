@@ -21,52 +21,31 @@ import com.assignmentforemail.pojo.RootMail;
 public class MailService {
 	@Value("${spring.mail.username}")
 	private String fromRootData;
-	//	private JavaMailSender javaMailSender;
-	//	@Autowired
 	@Autowired
 	private JavaMailSender mailSender;
-	//	public MailService(JavaMailSender javaMailSender) {
-	//		this.javaMailSender = javaMailSender;
-	//	}
-
-	public void sendEmail(RootMail rootMail) {
+	public void sendEmail(ArrayList toMail, ArrayList toCcc, ArrayList toBcc, String subject, String body) {
 		ObjectMapper mapper=new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		try {
-			List<String> holdtoEmail = new ArrayList<>();
-			System.out.println("rootMailrootMail == "+rootMail);
-//			System.out.println("==== "+rootMail.getEmailTo());
-//			List<String> dataToml=rootMail.getEmailTo();
-//			List<String> dataToml1=rootMail.getEmailTo();
-//			String strin=mapper.writeValueAsString(rootMail.emailTo);
-//			System.out.println("strinstrin == "+strin);
-//			String result = strin.replaceAll("\\[", " ");
-//			String result1 = result.replaceAll("\\]", " ");
-//			if(result1.contains(",")) {
-//				String arr[]=result1.toString().split(",");
-//				for (String string : arr) {
-//					holdtoEmail.add(string.replaceAll("''",""));
-//					System.out.println("aaaaaaaaa == "+string.replaceAll("[^a-zA-Z0-9]", " "));
-//				}
-//
-//			}
-//			System.out.println(result1+" == result == "+result);
-//			System.out.println("dataToml8888 >>> "+dataToml1);
 			MimeMessage message = mailSender.createMimeMessage();
 			MimeMessageHelper helper = new MimeMessageHelper(message, true);
-
-			//System.out.println("lstTo1== ::: "+lstTo1);
-			holdtoEmail.add("kumaamar888@gmail.com");
-			System.out.println("lstTolstTo ::: "+holdtoEmail);
-			if (CollectionUtils.isNotEmpty(holdtoEmail)) {
-				helper.setTo(holdtoEmail.stream().toArray(String[]::new));
+			String[] arrTomail = (String[]) toMail.stream().toArray(String[] ::new);
+			String[] arrToCcc = (String[]) toCcc.stream().toArray(String[] ::new);
+			String[] arrToBcc = (String[]) toBcc.stream().toArray(String[] ::new);
+			helper.setTo(arrTomail);
+			if(arrToCcc.length>0) {
+				helper.setTo(arrToCcc);
 			}
-			helper.setFrom(fromRootData);
-			helper.setSubject(rootMail.getSubject());
-			helper.setText(rootMail.getEmailBody());
+			if(arrToBcc.length>0) {
+				helper.setTo(arrToBcc);
+			}
+
+			helper.setSubject(subject);
+			helper.setText(body);
 			mailSender.send(message);
 		}catch(Exception ec) 
 		{
 			ec.printStackTrace();
 		}
+		//return "Email send successfully!";
 	}
 }

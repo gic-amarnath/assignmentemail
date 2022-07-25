@@ -1,7 +1,7 @@
 package com.assignmentforemail.pojo;
 
+import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,7 +9,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
@@ -17,7 +20,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 
 import lombok.Data;
-import lombok.ToString;
 
 //@ToString
 @Data
@@ -39,6 +41,7 @@ public class RootMailConfig {
 	@Type(type = "jsonb")
 	@Column(columnDefinition = "jsonb")
 	private JsonNode emailBCC;
-
-	private Date creationDate = new Date();
+	//@Temporal(TemporalType.DATE)
+	@CreationTimestamp
+	private LocalDateTime creationDate;//= new Date();
 }

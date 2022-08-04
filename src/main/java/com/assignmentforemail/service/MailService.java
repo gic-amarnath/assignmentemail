@@ -1,29 +1,22 @@
 package com.assignmentforemail.service;
 
-import java.util.ArrayList;
 import java.util.List;
-
 import javax.mail.internet.MimeMessage;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-
-import com.assignmentforemail.pojo.RootMail;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class MailService {
 	@Value("${spring.mail.username}")
 	private String fromRootData;
 	@Autowired
 	private JavaMailSender mailSender;
-	public void sendEmail(ArrayList toMail, ArrayList toCcc, ArrayList toBcc, String subject, String body) {
+	public void sendEmail(List<String> toMail, List<String> toCcc, List<String> toBcc, String subject, String body) {
+		System.out.println("------------Comming for mail send------------------");
 		ObjectMapper mapper=new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		try {
 			MimeMessage message = mailSender.createMimeMessage();

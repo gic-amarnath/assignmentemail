@@ -1,6 +1,6 @@
 package com.assignmentforemail.service;
-
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -23,6 +25,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 
 @Service
 public class EmailErviceImpl  implements EmailService{
@@ -31,6 +40,10 @@ public class EmailErviceImpl  implements EmailService{
 	EmailRepository emailrepo;
 	@Autowired
 	private RestTemplate restTemplate;
+	@Value("${excelfile.save.path}")
+	private String excelfilePath;
+	@Value("${pdf.file.save.path}")
+	private String pDFFilePath;
 	@Override
 	public RootMailConfig saveJson(JsonNode jsonNode) {
 		RootMailConfig inputData=new RootMailConfig();
@@ -107,7 +120,7 @@ public class EmailErviceImpl  implements EmailService{
 		int i=0;
 		try {
 			data.put(0, new Object[] {"ID","SUBJECT", "EMAIL_BODY", "EMAIL_TO", "EMAIL_CC", "EMAIL_BCC", "CREATION_DATE"});
-			
+
 			for (RootMailConfig rootMailConfig : docList) {
 				int ID = ++i;
 				String _id =""+rootMailConfig.getId();
@@ -131,10 +144,10 @@ public class EmailErviceImpl  implements EmailService{
 						cell.setCellValue(obj.toString());
 				}
 			}
-			
+
 			try
 			{
-				FileOutputStream out = new FileOutputStream(new File("D:\\ExcelFileWrite\\SearchData.xlsx"));
+				FileOutputStream out = new FileOutputStream(new File(excelfilePath));
 				workbook.write(out);
 				out.close();
 				workbook.close();
@@ -144,15 +157,75 @@ public class EmailErviceImpl  implements EmailService{
 			{
 				e.printStackTrace();
 			}
-			
+
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
 		}
-
+	}
+	@Override
+	public void writeDataInToPDF(List<RootMailConfig> listForPdf) {
+		// TODO Auto-generated method stub
+		//String path1 = "D:\\ExcelFileWrite\\SearchDataInPdf.pdf";
+		Document document = new Document();
+		List<RootMailConfig> listForPdfdub=listForPdf;
+		try {
+			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(pDFFilePath));
+			document.open();
+			PdfPTable table = new PdfPTable(7);
+			table.setWidthPercentage(100); //Width 100%
+			table.setSpacingBefore(10f); //Space before table
+			table.setSpacingAfter(10f);
+			addTableHeader(table);
+			addRows(table,listForPdfdub);
+			//addCustomRows(table);
+			document.add(table);
+			document.close();
+		} catch (FileNotFoundException | DocumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
+	private void addTableHeader(PdfPTable table) {
+		Stream.of("ID","SUBJECT", "EML_BODY", "EMAIL_TO", "EMAIL_CC", "EMAIL_BCC", "DATE")
+		.forEach(columnTitle -> {
+			PdfPCell header = new PdfPCell();
+			header.setBackgroundColor(BaseColor.RED);
+			header.setBorderWidth(1);
+			header.setPhrase(new Phrase(columnTitle));
+			table.addCell(header);
+		});
+	}
 
+	private void addRows(PdfPTable table,List<RootMailConfig> listForPdfdub) {
+		//table.addCell("row 1, col 1,row 1, col 1,row 1, col 1,row 1 ");
+		PdfPCell cell=null;
+		for (RootMailConfig listpdf: listForPdfdub) {
+			//PdfPCell cell;
+			cell = new PdfPCell(new Phrase(""+listpdf.getId()));
+			table.addCell(cell);
+			cell = new PdfPCell(new Phrase(listpdf.getSubject()));
+			table.addCell(cell);
+			cell = new PdfPCell(new Phrase(listpdf.getEmailBody()));
+			table.addCell(cell);
+			cell = new PdfPCell(new Phrase(listpdf.getEmailTo()));
+			table.addCell(cell);
+			cell = new PdfPCell(new Phrase(listpdf.getEmailCC()));
+			table.addCell(cell);
+			cell = new PdfPCell(new Phrase(listpdf.getEmailBCC()));
+			table.addCell(cell);
+			cell = new PdfPCell(new Phrase(""+listpdf.getCreationDate()));
+			table.addCell(cell);
+			//table.addCell(cell);
+		}
+		table.addCell(cell);
+	}
+	@Override
+	public void countEmalByFilter(List<RootMailConfig> listForPdf) {
+		// TODO Auto-generated method stub
+		
+	}
 
 
 }

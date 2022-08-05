@@ -9,6 +9,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public interface EmailService {
 	public RootMailConfig saveJson(JsonNode jsonNode);
-	//public void callAPIWriteDataInExcel(List<RootMailConfig> rootMailConfig);
 	public  void writeDataToExcel(List<RootMailConfig> docList);
+	public  void writeDataInToPDF(List<RootMailConfig> listForPdf);
+	public  void countEmalByFilter(List<RootMailConfig> listForPdf);
+	
+	
 }

@@ -39,6 +39,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import org.apache.commons.lang3.StringUtils;
+
 @CrossOrigin("*")
 @RestController
 @RequestMapping("/api/data")
@@ -123,14 +125,14 @@ public class DataReadController {
 
 	@PostMapping("/emailData/search")
 	public ResponseEntity<List<RootMailConfig>> getAllMailDataSearch(@RequestBody MailSearchData emailSearchReqst) {
-		System.out.println("--------------Multi Search API---------------------- "+emailSearchReqst.getEmailBCC());
+		System.out.println("--------------Multi Search API---------------------- ");
 		boolean isFilter = false;
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<RootMailConfig> criteriaQuery = criteriaBuilder.createQuery(RootMailConfig.class);
 		Root<RootMailConfig> itemRoot = criteriaQuery.from(RootMailConfig.class);
 		List<Predicate> predicates = new ArrayList<>();
 		List<RootMailConfig> rootMailConfig = new ArrayList<>();
-		if (emailSearchReqst.getSubject()!=null ) {
+		if (StringUtils.isNotBlank(emailSearchReqst.getSubject())) {
 			predicates.add(criteriaBuilder.like(criteriaBuilder.lower(itemRoot.get("subject")),"%"+emailSearchReqst.getSubject().toLowerCase()+"%"));
 			isFilter = true;
 		}
@@ -148,24 +150,32 @@ public class DataReadController {
 			System.out.println("emmll >>> "+emailSearchReqst.getEmailTo());
 			String toEmlname=emailSearchReqst.getEmailTo().get(0).asText().trim();
 			System.out.println("namenamename ::: "+toEmlname);
-			predicates.add(criteriaBuilder.like(criteriaBuilder.lower(itemRoot.get("emailTo")),"%"+toEmlname.toLowerCase()+"%"));
-			isFilter = true;
+			if(StringUtils.isNotEmpty(toEmlname)) {
+				predicates.add(criteriaBuilder.like(criteriaBuilder.lower(itemRoot.get("emailTo")),"%"+toEmlname.toLowerCase()+"%"));
+				isFilter = true;
+			}
+			//			predicates.add(criteriaBuilder.like(criteriaBuilder.lower(itemRoot.get("emailTo")),"%"+toEmlname.toLowerCase()+"%"));
+			//			isFilter = true;
 		}
 
 		if (emailSearchReqst.getEmailCC()!=null && !emailSearchReqst.getEmailCC().isEmpty()) {
 			System.out.println("toEmlCCname >>> "+emailSearchReqst.getEmailCC());
 			String toEmlCCname=emailSearchReqst.getEmailCC().get(0).asText().trim();
-			System.out.println("namenamename ::: "+toEmlCCname);
-			predicates.add(criteriaBuilder.like(criteriaBuilder.lower(itemRoot.get("emailCC")),"%"+toEmlCCname.toLowerCase()+"%"));
-			isFilter = true;
+			//			System.out.println("namenamename ::: "+toEmlCCname);
+			if(StringUtils.isNotEmpty(toEmlCCname)) {
+				predicates.add(criteriaBuilder.like(criteriaBuilder.lower(itemRoot.get("emailCC")),"%"+toEmlCCname.toLowerCase()+"%"));
+				isFilter = true;
+			}
 		}
 
 		if (emailSearchReqst.getEmailBCC()!=null && !emailSearchReqst.getEmailBCC().isEmpty()) {
 			System.out.println("toEmlBCCname >>> "+emailSearchReqst.getEmailBCC());
 			String toEmlBCCname=emailSearchReqst.getEmailBCC().get(0).asText().trim();
-			System.out.println("namenamename ::: "+toEmlBCCname);
-			predicates.add(criteriaBuilder.like(criteriaBuilder.lower(itemRoot.get("emailBCC")),"%"+toEmlBCCname.toLowerCase()+"%"));
-			isFilter = true;
+			//			System.out.println("namenamename ::: "+toEmlBCCname);
+			if(StringUtils.isNotEmpty(toEmlBCCname)) {
+				predicates.add(criteriaBuilder.like(criteriaBuilder.lower(itemRoot.get("emailBCC")),"%"+toEmlBCCname.toLowerCase()+"%"));
+				isFilter = true;
+			}
 		}
 
 		if (isFilter) {
